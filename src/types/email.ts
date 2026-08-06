@@ -41,6 +41,8 @@ export interface EmailData {
   courseName: string;
   recipientGreeting: string;
   courseDate?: string;
+  courseStartTime?: string;
+  courseEndTime?: string;
   courseTime?: string;
   courseLocation?: string;
   preWork?: string[];
@@ -49,6 +51,7 @@ export interface EmailData {
   resourceLinks?: LinkItem[];
   assignments?: string[];
   followUpDate?: string;
+  courseOwners?: string[];
   courseOwner: string;
   closingGreeting: string;
   tone: ToneStyle;
