@@ -229,8 +229,23 @@ Adhere to the requested TONE and CONTENT LENGTH exactly.
 Always output JSON with 'subject' and 'body' fields.`
           }),
         });
+
+        if (!response.ok) {
+          let errDetail = "";
+          try {
+            const errJson = await response.json();
+            errDetail = errJson.error || errJson.message || "";
+          } catch {
+            errDetail = await response.text();
+          }
+          throw new Error(`Server returned ${response.status}: ${errDetail}`);
+        }
         
         const resData = await response.json();
+        if (!resData.text) {
+          throw new Error("Empty response from AI server.");
+        }
+
         try {
           const jsonMatch = resData.text.match(/\{[\s\S]*\}/);
           const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : resData.text);
@@ -241,9 +256,9 @@ Always output JSON with 'subject' and 'body' fields.`
             body: resData.text
           });
         }
-      } catch (error) {
-        console.error(error);
-        alert("AI 生成失敗，改用模板生成。");
+      } catch (error: any) {
+        console.error("AI Generation Failed:", error);
+        alert(`AI 生成失敗 (${error?.message || "網路或伺服器異常"})，將為您改用系統模板生成。`);
         generateEmail(false, adj);
       }
     } else {

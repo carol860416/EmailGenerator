@@ -24,21 +24,42 @@ async function startServer() {
   // AI Generation Endpoint
   app.post("/api/generate-email", async (req, res) => {
     try {
-      const { prompt, systemInstruction } = req.body;
-      
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          systemInstruction: systemInstruction || "You are a professional HR specialist specializing in Training and Development.",
-          temperature: 0.7,
-        },
-      });
+      const { prompt, systemInstruction } = req.body || {};
 
-      res.json({ text: response.text });
+      if (!process.env.GEMINI_API_KEY) {
+        return res.status(500).json({ 
+          error: "Missing GEMINI_API_KEY environment variable." 
+        });
+      }
+
+      let responseText = "";
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-3.6-flash",
+          contents: prompt,
+          config: {
+            systemInstruction: systemInstruction || "You are a professional HR specialist specializing in Training and Development.",
+            temperature: 0.7,
+          },
+        });
+        responseText = response.text || "";
+      } catch (modelErr: any) {
+        console.warn("Primary model gemini-3.6-flash failed, trying fallback model gemini-2.5-flash:", modelErr?.message);
+        const fallbackResponse = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt,
+          config: {
+            systemInstruction: systemInstruction || "You are a professional HR specialist specializing in Training and Development.",
+            temperature: 0.7,
+          },
+        });
+        responseText = fallbackResponse.text || "";
+      }
+
+      res.json({ text: responseText });
     } catch (error: any) {
       console.error("Gemini Error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message || "Failed to generate email." });
     }
   });
 
