@@ -1,0 +1,6 @@
+{
+  "name": "Moxa Course Email Helper",
+  "description": "協助培訓發展人員快速產出課前及課後通訊電子郵件，提升溝通效率與品質。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
